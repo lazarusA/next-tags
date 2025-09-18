@@ -22,7 +22,7 @@ const VersionSelector = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    fetch("/versions.json")
+    fetch(`${process.env.PUBLIC_URL}/versions.json`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load versions.json");
         return res.json();
