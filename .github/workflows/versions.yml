@@ -1,0 +1,76 @@
+name: Generate versions.json
+
+on:
+  push:
+    branches:
+      - gh-pages
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          fetch-depth: 0
+
+      - name: Prevent infinite loop
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            MSG=$(jq -r .head_commit.message "$GITHUB_EVENT_PATH")
+            if echo "$MSG" | grep -q "\[skip-versions\]"; then
+              echo "Skipping to avoid workflow loop"
+              exit 0
+            fi
+          fi
+
+      - name: Generate versions.json
+        id: generate
+        run: |
+          set -euo pipefail
+          # List top-level directories (excluding .git)
+          DIRS=$(find . -maxdepth 1 -mindepth 1 -type d -printf '%f\n' | grep -v '^.git$' || true)
+
+          # Extract version-style dirs and detect "latest"
+          TAGS=$(echo "$DIRS" | grep -E '^v[0-9]+' || true)
+          HAS_LATEST=$(echo "$DIRS" | grep -x 'latest' || true)
+
+          if [ -n "$TAGS" ]; then
+            SORTED=$(echo "$TAGS" | sort -V -r)
+            VERSIONS_ARRAY=$(printf '%s\n' "$SORTED" | jq -R -s -c 'split("\n")[:-1]')
+          else
+            VERSIONS_ARRAY='[]'
+          fi
+
+          if [ -n "$HAS_LATEST" ]; then
+            VERSIONS_JSON=$(jq -c --argjson versions "$VERSIONS_ARRAY" '["latest"] + $versions' <<< "$VERSIONS_ARRAY")
+          else
+            VERSIONS_JSON=$VERSIONS_ARRAY
+          fi
+
+          echo "$VERSIONS_JSON" > versions.json
+
+          echo "versions.json generated:"
+          cat versions.json
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Stage versions.json
+          git add versions.json
+
+          # Check if there are differences
+          if git diff --staged --quiet; then
+            echo "No changes in versions.json, skipping commit."
+            exit 0
+          fi
+
+          git commit -m "Update versions.json [skip-versions]"
+          git push origin gh-pages
