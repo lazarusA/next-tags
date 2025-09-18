@@ -1,0 +1,16 @@
+name-template: 'Release ${{ tag_name }}'
+tag-template: ${{ tag_name }}
+categories:
+  - title: '🚀 Features'
+    labels:
+      - 'feature'
+      - 'enhancement'
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'fix'
+      - 'bugfix'
+      - 'bug'
+  - title: '🧰 Maintenance'
+    label: 'chore'
+change-template: '- ${{ message }} [#${{ pr_number }}](${{ url }}) by @${{ contributor }}'
+no-changes-template: 'No user-facing changes in this release.'
