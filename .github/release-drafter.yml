@@ -12,5 +12,10 @@ categories:
       - 'bug'
   - title: '🧰 Maintenance'
     label: 'chore'
+  - title: '📚 Documentation'
+    labels:
+      - 'documentation'
+      - 'docs'
+      - 'readme'
 change-template: '- ${{ message }} [#${{ pr_number }}](${{ url }}) by @${{ contributor }}'
 no-changes-template: 'No user-facing changes in this release.'
