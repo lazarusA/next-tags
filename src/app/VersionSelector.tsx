@@ -45,13 +45,13 @@ const VersionSelector = () => {
         setVersions(sorted);
 
         // Detect current version from path
-        // pathSegments[1] = latest or vX.Y.Z
-        const currentVersion = pathSegments[1] || "latest";
-        if (sorted.includes(currentVersion)) {
-          setSelectedVersion(currentVersion);
-        } else {
-          setSelectedVersion(sorted[0] ?? null);
-        }
+        const currentVersionFromPath = pathSegments[1] || "latest";
+        
+        // Since formats always match, do direct comparison
+        const detectedVersion = sorted.find(v => v === currentVersionFromPath);
+        
+        // Set the detected version or fallback to first version
+        setSelectedVersion(detectedVersion || sorted[0] || null);
       })
       .catch((err) => {
         console.error("Could not fetch versions.json", err);
@@ -104,7 +104,9 @@ const VersionSelector = () => {
                 onClick={() => handleVersionSelect(version)}
                 className="flex items-center justify-between w-full px-3 py-2 text-sm text-left hover:bg-gray-100 rounded-sm focus:outline-none focus:bg-gray-100"
               >
-                <span>{version}</span>
+                <span className={selectedVersion === version ? "font-medium" : ""}>
+                  {version}
+                </span>
                 {selectedVersion === version && (
                   <FaCheck className="w-4 h-4 text-orange-600" />
                 )}
