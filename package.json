@@ -2,8 +2,11 @@
   "name": "next-tags",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.11.1",
   "scripts": {
     "dev": "next dev --turbopack",
+    "buildRepo": "pnpm rmBuild && pnpm build",
+    "rmBuild": "pnpm -r exec rm -rf out",
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint"
