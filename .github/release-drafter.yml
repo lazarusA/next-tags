@@ -19,7 +19,7 @@ categories:
       - 'docs'
       - 'readme'
 change-template: '- ${{ message }} [#${{ pr_number }}](${{ url }}) by @${{ contributor }}'
-no-changes-template: ''
+no-changes-template: 'no changes'
 
 prerelease: false
 include-pre-releases: false
