@@ -1,5 +1,6 @@
-name-template: 'Release ${{ tag_name }}'
-tag-template: ${{ tag_name }}
+name-template: '${{ tag_name }}'
+tag-template: '${{ tag_name }}'
+version-template: '${{ tag_name }}'
 categories:
   - title: '🚀 Features'
     labels:
@@ -18,11 +19,18 @@ categories:
       - 'docs'
       - 'readme'
 change-template: '- ${{ message }} [#${{ pr_number }}](${{ url }}) by @${{ contributor }}'
-no-changes-template: 'No user-facing changes in this release.'
+no-changes-template: ''
+
+prerelease: false
+include-pre-releases: false
+no-contributors-template: 'No contributors'
 
 template: |
   ## What’s Changed
   $CHANGES
 
   ## Contributors
+  {% if CONTRIBUTORS %}
+  ## Contributors
   $CONTRIBUTORS
+  {% endif %}
