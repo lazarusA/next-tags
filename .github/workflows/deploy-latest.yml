@@ -29,7 +29,7 @@ jobs:
 
       - name: Build site
         env:
-          BASE_PATH: /latest
+          BASE_PATH: ""
         run: pnpm buildRepo
 
       - name: Deploying latest 🚀
