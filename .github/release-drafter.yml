@@ -19,3 +19,10 @@ categories:
       - 'readme'
 change-template: '- ${{ message }} [#${{ pr_number }}](${{ url }}) by @${{ contributor }}'
 no-changes-template: 'No user-facing changes in this release.'
+
+template: |
+  ## What’s Changed
+  $CHANGES
+
+  ## Contributors
+  $CONTRIBUTORS
