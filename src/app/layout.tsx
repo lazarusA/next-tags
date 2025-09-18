@@ -15,9 +15,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "next tag",
   description: "template for tagged versions using next.js",
-  icons: {
-    icon: './favicon.ico',
-  },
 };
 
 export default function RootLayout({
