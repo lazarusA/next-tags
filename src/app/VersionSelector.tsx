@@ -1,16 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { FaCheck } from "react-icons/fa6";
 import { LuChevronDown } from "react-icons/lu";
@@ -22,13 +13,21 @@ const VersionSelector = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    fetch(`${process.env.PUBLIC_URL}/versions.json`)
+    // Detect GitHub Pages base path automatically
+    // e.g., /next-tags for https://username.github.io/next-tags/
+    const pathSegments = window.location.pathname.split("/").filter(Boolean);
+    const repoBase = pathSegments.length ? `/${pathSegments[0]}` : "";
+
+    // versions.json lives at the root of the repo
+    const versionsUrl = `${window.location.origin}${repoBase}/versions.json`;
+
+    fetch(versionsUrl)
       .then((res) => {
-        if (!res.ok) throw new Error("Failed to load versions.json");
+        if (!res.ok) throw new Error(`Failed to load ${versionsUrl}`);
         return res.json();
       })
       .then((data: string[]) => {
-        // ensure latest first, then semver descending
+        // Sort versions: latest first, then semver descending
         const sorted = data.sort((a, b) => {
           if (a === "latest") return -1;
           if (b === "latest") return 1;
@@ -45,10 +44,11 @@ const VersionSelector = () => {
 
         setVersions(sorted);
 
-        // detect current version from path
-        const currentPath = window.location.pathname.split("/")[1]; // e.g. "latest" or "v1.2.3"
-        if (sorted.includes(currentPath)) {
-          setSelectedVersion(currentPath);
+        // Detect current version from path
+        // pathSegments[1] = latest or vX.Y.Z
+        const currentVersion = pathSegments[1] || "latest";
+        if (sorted.includes(currentVersion)) {
+          setSelectedVersion(currentVersion);
         } else {
           setSelectedVersion(sorted[0] ?? null);
         }
@@ -65,11 +65,14 @@ const VersionSelector = () => {
     setSelectedVersion(version);
     setIsOpen(false);
 
-    // redirect
+    // Redirect to correct version path
+    const pathSegments = window.location.pathname.split("/").filter(Boolean);
+    const repoBase = pathSegments.length ? `/${pathSegments[0]}` : "";
+
     if (version === "latest") {
-      window.location.href = "/latest/";
+      window.location.href = `${repoBase}/latest/`;
     } else {
-      window.location.href = `/${version}/`;
+      window.location.href = `${repoBase}/${version}/`;
     }
   };
 
@@ -82,13 +85,9 @@ const VersionSelector = () => {
           <TooltipTrigger asChild>
             <PopoverTrigger asChild>
               <Button variant="ghost">
-                <span>
-                  <BsTags />
-                </span>
+                <span><BsTags /></span>
                 <LuChevronDown
-                  className={`w-4 h-4 transition-transform ${
-                    isOpen ? "rotate-180" : ""
-                  }`}
+                  className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
                 />
               </Button>
             </PopoverTrigger>
