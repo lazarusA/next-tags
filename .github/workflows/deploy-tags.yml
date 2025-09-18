@@ -1,0 +1,38 @@
+name: Deploy tag → gh-pages/tag
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+
+permissions: write-all
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup repo 🔧
+        uses: ./.github/actions
+
+      - name: Build site
+        env:
+          BASE_PATH: ""
+        run: pnpm buildRepo
+
+      - name: Deploying release 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: out
+          target-folder: ${{ github.ref_name }}
+          clean: false
