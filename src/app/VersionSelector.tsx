@@ -49,13 +49,13 @@ const VersionSelector = () => {
           <TooltipTrigger asChild>
             <PopoverTrigger asChild>
               <Button variant={"ghost"}>
-                <span className="font-mono"><BsTags /></span>
+                <span ><BsTags /></span>
                 <LuChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
               </Button>
             </PopoverTrigger>
           </TooltipTrigger>
           <TooltipContent side="left">
-            <p className="font-mono">{selectedVersion}</p>
+            <p >{selectedVersion}</p>
           </TooltipContent>
         </Tooltip>
         <PopoverContent className="w-28 p-1" align="start">
@@ -66,7 +66,7 @@ const VersionSelector = () => {
                 onClick={() => handleVersionSelect(version)}
                 className="flex items-center justify-between w-full px-3 py-2 text-sm text-left hover:bg-gray-100 rounded-sm focus:outline-none focus:bg-gray-100"
               >
-                <span className="font-mono">{version}</span>
+                <span >{version}</span>
                 {selectedVersion === version && (
                   <FaCheck className="w-4 h-4 text-orange-600" />
                 )}
