@@ -15,6 +15,7 @@ export default function Home() {
           height={38}
           priority
         />
+      <h1>Template with CI workflows for deploying tagged versions of Next.js sites.</h1>
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <a
