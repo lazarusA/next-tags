@@ -13,13 +13,24 @@ const VersionSelector = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    // Detect GitHub Pages base path automatically
-    // e.g., /next-tags for https://username.github.io/next-tags/
-    const pathSegments = window.location.pathname.split("/").filter(Boolean);
-    const repoBase = pathSegments.length ? `/${pathSegments[0]}` : "";
+    const { hostname, pathname, origin } = window.location;
+    const pathSegments = pathname.split("/").filter(Boolean);
 
-    // versions.json lives at the root of the repo
-    const versionsUrl = `${window.location.origin}${repoBase}/versions.json`;
+    const isGitHubPages = hostname.endsWith("github.io");
+    const isLocalhost =
+      hostname === "localhost" || hostname.startsWith("10.");
+
+    const repoBase =
+      isGitHubPages && pathSegments.length ? `/${pathSegments[0]}` : "";
+
+    // dev mode: no versions.json
+    if (isLocalhost) {
+      setVersions(["latest"]);
+      setSelectedVersion("latest");
+      return;
+    }
+
+    const versionsUrl = `${origin}${repoBase}/versions.json`;
 
     fetch(versionsUrl)
       .then((res) => {
@@ -27,36 +38,29 @@ const VersionSelector = () => {
         return res.json();
       })
       .then((data: string[]) => {
-        // Sort versions: latest first, then semver descending
         const sorted = data.sort((a, b) => {
           if (a === "latest") return -1;
           if (b === "latest") return 1;
-
-          const parseVersion = (v: string) =>
-            v.replace("v", "").split(".").map(Number);
-          const [aMajor, aMinor, aPatch] = parseVersion(a);
-          const [bMajor, bMinor, bPatch] = parseVersion(b);
-
-          if (aMajor !== bMajor) return bMajor - aMajor;
-          if (aMinor !== bMinor) return bMinor - aMinor;
+          const parse = (v: string) => v.replace("v", "").split(".").map(Number);
+          const [aMaj, aMin, aPatch] = parse(a);
+          const [bMaj, bMin, bPatch] = parse(b);
+          if (aMaj !== bMaj) return bMaj - aMaj;
+          if (aMin !== bMin) return bMin - aMin;
           return bPatch - aPatch;
         });
 
         setVersions(sorted);
 
-        // Detect current version from path
-        const currentVersionFromPath = pathSegments[1] || "latest";
-        
-        // Since formats always match, do direct comparison
-        const detectedVersion = sorted.find(v => v === currentVersionFromPath);
-        
-        // Set the detected version or fallback to first version
+        const currentVersionFromPath = isGitHubPages
+          ? pathSegments[1] || "latest" // repo/version/...
+          : pathSegments[0] || "latest"; // version/... on custom domain
+
+        const detectedVersion = sorted.find((v) => v === currentVersionFromPath);
         setSelectedVersion(detectedVersion || sorted[0] || null);
       })
       .catch((err) => {
         console.error("Could not fetch versions.json", err);
-        const fallback = ["latest"];
-        setVersions(fallback);
+        setVersions(["latest"]);
         setSelectedVersion("latest");
       });
   }, []);
@@ -65,10 +69,14 @@ const VersionSelector = () => {
     setSelectedVersion(version);
     setIsOpen(false);
 
-    // Redirect to correct version path
-    const pathSegments = window.location.pathname.split("/").filter(Boolean);
-    const repoBase = pathSegments.length ? `/${pathSegments[0]}` : "";
+    const { hostname, pathname } = window.location;
+    const pathSegments = pathname.split("/").filter(Boolean);
 
+    const isGitHubPages = hostname.endsWith("github.io");
+    const repoBase =
+      isGitHubPages && pathSegments.length ? `/${pathSegments[0]}` : "";
+
+    // Always use /latest/ for latest, regardless of domain
     if (version === "latest") {
       window.location.href = `${repoBase}/latest/`;
     } else {
@@ -96,7 +104,7 @@ const VersionSelector = () => {
             <p>{selectedVersion}</p>
           </TooltipContent>
         </Tooltip>
-        <PopoverContent className="w-28 p-1" align="start">
+        <PopoverContent className="w-28 p-1" align="end">
           <div className="space-y-1">
             {versions.map((version) => (
               <button
@@ -104,7 +112,7 @@ const VersionSelector = () => {
                 onClick={() => handleVersionSelect(version)}
                 className="flex items-center justify-between w-full px-3 py-2 text-sm text-left hover:bg-gray-100 rounded-sm focus:outline-none focus:bg-gray-100"
               >
-                <span className={selectedVersion === version ? "font-medium" : ""}>
+                <span className={selectedVersion === version ? "font-bold" : ""}>
                   {version}
                 </span>
                 {selectedVersion === version && (
