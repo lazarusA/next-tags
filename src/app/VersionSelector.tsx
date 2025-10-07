@@ -87,12 +87,11 @@ const VersionSelector = () => {
   if (!versions.length || !selectedVersion) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-50">
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <Tooltip>
           <TooltipTrigger asChild>
             <PopoverTrigger asChild>
-              <Button variant="ghost">
+              <Button variant="ghost" size="sm" className="cursor-pointer">
                 <span><BsTags /></span>
                 <LuChevronDown
                   className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
@@ -101,16 +100,19 @@ const VersionSelector = () => {
             </PopoverTrigger>
           </TooltipTrigger>
           <TooltipContent side="left">
-            <p>{selectedVersion}</p>
+            {selectedVersion}
           </TooltipContent>
         </Tooltip>
         <PopoverContent className="w-28 p-1" align="end">
           <div className="space-y-1">
             {versions.map((version) => (
-              <button
+              <Button
                 key={version}
+                variant= "ghost"
+                size="sm"
+                className="cursor-pointer flex items-center justify-between w-full px-3 py-2 text-sm rounded-sm"
                 onClick={() => handleVersionSelect(version)}
-                className="flex items-center justify-between w-full px-3 py-2 text-sm text-left hover:bg-gray-100 rounded-sm focus:outline-none focus:bg-gray-100"
+                aria-label={`Select version ${version}`}
               >
                 <span className={selectedVersion === version ? "font-bold" : ""}>
                   {version}
@@ -118,12 +120,11 @@ const VersionSelector = () => {
                 {selectedVersion === version && (
                   <FaCheck className="w-4 h-4 text-orange-600" />
                 )}
-              </button>
+              </Button>
             ))}
           </div>
         </PopoverContent>
       </Popover>
-    </div>
   );
 };
 
